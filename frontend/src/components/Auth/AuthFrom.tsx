@@ -47,13 +47,13 @@ export default function AuthForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-green-100">
-      <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md">
+      <div className="bg-white p-10 rounded-3xl shadow-xl w-full max-w-md">
         {/* Logo */}
         <h1 className="text-3xl font-bold text-center mb-6 text-green-700">
           EcoFinds
         </h1>
 
-        {/* Toggle */}
+        {/* Toggle Login/Signup */}
         <div className="flex justify-center mb-6 bg-gray-200 rounded-full p-1">
           <button
             className={`flex-1 py-2 rounded-full transition-colors ${
