@@ -1,19 +1,84 @@
-import fs from "fs-extra";
+import fs from "fs";
+import path from "path";
 
-const productsFile = "./data/products.json";
+const dataFilePath = path.resolve("./data/products.json");
 
-export const getProducts = async (req, res) => {
-  const products = await fs.readJson(productsFile).catch(() => []);
-  res.json(products);
+// Get all products
+export const getProducts = (req, res) => {
+  try {
+    const data = fs.readFileSync(dataFilePath, "utf-8");
+    const products = JSON.parse(data);
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: "Error reading products file" });
+  }
 };
 
-export const addProduct = async (req, res) => {
-  const { title, description, category, price, image } = req.body;
-  let products = await fs.readJson(productsFile).catch(() => []);
+// Add new product
+export const addProduct = (req, res) => {
+  try {
+    const data = fs.readFileSync(dataFilePath, "utf-8");
+    const products = JSON.parse(data);
 
-  const newProduct = { id: Date.now(), title, description, category, price, image };
-  products.push(newProduct);
+    const newProduct = {
+      id: Date.now(),
+      ...req.body,
+    };
 
-  await fs.writeJson(productsFile, products, { spaces: 2 });
-  res.json({ message: "Product added", product: newProduct });
+    products.push(newProduct);
+    fs.writeFileSync(dataFilePath, JSON.stringify(products, null, 2));
+
+    res.status(201).json(newProduct);
+  } catch (error) {
+    res.status(500).json({ message: "Error adding product" });
+  }
+};
+
+// Update product
+export const updateProduct = (req, res) => {
+  try {
+    const data = fs.readFileSync(dataFilePath, "utf-8");
+    let products = JSON.parse(data);
+
+    const productIndex = products.findIndex(
+      (p) => p.id === parseInt(req.params.id)
+    );
+
+    if (productIndex === -1) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    products[productIndex] = {
+      ...products[productIndex],
+      ...req.body,
+    };
+
+    fs.writeFileSync(dataFilePath, JSON.stringify(products, null, 2));
+
+    res.json(products[productIndex]);
+  } catch (error) {
+    res.status(500).json({ message: "Error updating product" });
+  }
+};
+
+// Delete product
+export const deleteProduct = (req, res) => {
+  try {
+    const data = fs.readFileSync(dataFilePath, "utf-8");
+    let products = JSON.parse(data);
+
+    const filtered = products.filter(
+      (p) => p.id !== parseInt(req.params.id)
+    );
+
+    if (filtered.length === products.length) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    fs.writeFileSync(dataFilePath, JSON.stringify(filtered, null, 2));
+
+    res.json({ message: "Product deleted" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting product" });
+  }
 };
